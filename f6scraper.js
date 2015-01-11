@@ -21,15 +21,21 @@ function goScrap(i) {
 		$("li").each(function (idx, elem) {
 			var data = $(elem);
 			var oRslt = {};
-
-			oRslt.title = data.find('h3').children().text();
-			oRslt.link = data.find('.find-out-more').attr('href');
-			oRslt.country = data.find('h3').next().text().replace(/[\n\r\t]+/g, ''); // apparently, the country is always the node after the <h3>
-			oRslt.dateRange = data.find('.bullet, .r').parent().text();
 			var calendar = data.find('.calendar');
-			// if (calendar.find('.red').text() == "Deadline")  {
+			var h3 = data.find('h3');
+			var bullets = cleanText(data.find('.bullet, .r').parent().text());
+
+			oRslt.title = h3.children().text();
 			oRslt.deadline = calendar.children('.big-date').text() + " " + calendar.children('.small-date').text();
-			// }
+			oRslt.link = data.find('.find-out-more').attr('href');
+			oRslt.country = cleanText(h3.next().text()); // apparently, the country is always the node after the <h3>
+
+			var dateRange = /(\w{3}\s\d{1,2})*/g.exec(bullets);
+			console.log(dateRange);
+			oRslt.startDate = dateRange[0] || '';
+			oRslt.endDate = dateRange[1] || '';
+
+
 			finalArray.push(oRslt);
 		});
 		finalTxt = finalArray.filter(function (val) {
@@ -39,6 +45,10 @@ function goScrap(i) {
 		});
 		fs.appendFileSync('output.json', JSON.stringify(finalTxt, null, 4));
 	});
+}
+
+function cleanText(txt) {
+	return txt.replace(/[\n\r\t]+/g, '');
 }
 
 for (var i = 0; i < 10; i++) {
