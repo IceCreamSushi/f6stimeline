@@ -13,29 +13,58 @@
         var container = document.querySelector('.f6svizu');
         // var f6sData = loadJSON('./output.json');
 
-        // filter data by Starting date, not deadline
-        function dataRange(data) {
+        // filter data by Starting date
+        function dataStart(data) {
             var dataFiltered = data.filter(function(elem){return elem.startDate;}).map(function (elem, idx) {
-                var returnObject = {id:idx, content:elem.title, title:elem.country, start:vis.moment(new Date(elem.startDate+" 2015"))}; // vis.js wants a moment(Date)
+                var returnObject = {id:idx, content:elem.title, title:[elem.title,elem.country].join(','), start:adaptDate(elem.startDate+" 2015")};
                 return returnObject;
             });
             return dataFiltered;
         }
 
+        // filter data by Starting date and Ending date
+        function dataRange(data) {
+            var dataFiltered = data.filter(function(elem){return elem.startDate && elem.endDate;}).map(function (elem, idx) {
+                var returnObject = {id:idx, content:elem.title, title:[elem.title,elem.country].join(','), start:adaptDate(elem.startDate+" 2015"), end:adaptDate(elem.endDate+" 2015")};
+                return returnObject;
+            });
+            return dataFiltered;
+        }
 
-        // filter data by Deadline, not starting date
+        // filter data by Deadline
         function dataDeadline(data) {
             var dataFiltered = data.filter(function(elem){return elem.deadline;}).map(function (elem, idx) {
-                var returnObject = {id:idx, content:elem.title, title:elem.country, start:vis.moment(new Date(elem.deadline))}; // vis.js wants a moment(Date)
+                var returnObject = {id:idx, content:elem.title, title:[elem.title,elem.country].join(','), start:adaptDate(elem.deadline)};
                 return returnObject;
             });
             return dataFiltered;
         }
 
-        var data = dataRange(f6sData);
-        var options = {width: '100%', height:'600px', margin:{item:20}};
-        var timeline = new vis.Timeline(container, data, options);
+        // return a moment, needed by vis
+        function adaptDate(date) {
+            return vis.moment(new Date(date));
+        }
+
+        function updateTimeline(type) {
+            if(type === 'range') {
+                data = dataRange(f6sData);
+            } else if (type=='start') {
+                data = dataStart(f6sData);
+            } else {
+                data = dataDeadline(f6sData);
+            }
+            timeline.setItems(data);
+            timeline.fit();
+        }
+
+        data = dataRange(f6sData);
+        options = {width: '100%', height:'500px', margin:{item:15}, clickToUse:true};
+        timeline = new vis.Timeline(container, data, options);
 
         </script>
+
+        <button onclick="updateTimeline('deadline');">By deadline</button>
+        <button onclick="updateTimeline('start');">By starting date</button>
+        <button onclick="updateTimeline('range');">By duration</button>
     </body>
 </html>
