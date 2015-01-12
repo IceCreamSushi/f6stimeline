@@ -30,7 +30,13 @@ function goScrap(i) {
 			oRslt.link = data.find('.find-out-more').attr('href');
 			oRslt.country = cleanText(h3.next().text()); // apparently, the country is always the node after the <h3>
 
-			var dateRange = /(\w{3}\s\d{1,2})*/g.exec(bullets);
+			var dateRange = [];
+			var dateRegex = /(\w{3}\s\d+)/g;
+			var matches;
+
+			while (matches = dateRegex.exec(bullets)) {
+				dateRange.push(matches[1]);
+			}
 			console.log(dateRange);
 			oRslt.startDate = dateRange[0] || '';
 			oRslt.endDate = dateRange[1] || '';
